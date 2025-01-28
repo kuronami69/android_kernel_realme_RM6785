@@ -20,9 +20,8 @@ jobs:
       env:
         NAME: Loganysl
       with:
-        arch: arm64
-        CLANG_TRIPLE: aarch64-linux-gnu
-        CROSS_COMPILE: aarch64-linux-gnu
+        arch: ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- O=out
+        
         compiler: aosp-clang/android11-release/clang-r365631c/binutils
         defconfig: RM6785_defconfig
         image: Image.gz-dtb
