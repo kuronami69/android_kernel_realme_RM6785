@@ -21,7 +21,7 @@ jobs:
         NAME: Loganysl
       with:
         arch: arm64
-        compiler: gcc/12
+        compiler: aosp-clang/android11-release/clang-r365631c/binutils
         defconfig: RM6785_defconfig
         image: Image.gz-dtb
 
