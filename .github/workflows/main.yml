@@ -22,9 +22,8 @@ jobs:
       with:
         arch: arm64
         CLANG_TRIPLE: aarch64-linux-gnu
-        CROSS_COMPILE: "${PWD}/clang/bin/aarch64-linux-gnu
-        CROSS_COMPILE_ARM32: "${PWD}/clang/bin/arm-linux-gnueabi
-        compiler: 
+        
+        compiler: gcc/10
         defconfig: RM6785_defconfig
         image: Image.gz-dtb
 
