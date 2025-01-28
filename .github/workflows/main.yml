@@ -23,7 +23,7 @@ jobs:
         arch: arm64
         CLANG_TRIPLE: aarch64-linux-gnu
         CROSS_COMPILE: aarch64-linux-gnu
-        compiler: aosp-clang/master
+        compiler: aosp-clang/android11-release/clang-r365631c/binutils
         defconfig: RM6785_defconfig
         image: Image.gz-dtb
 
