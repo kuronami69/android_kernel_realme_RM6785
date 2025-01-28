@@ -31,7 +31,7 @@ jobs:
         NAME: Loganysl
       with:
         arch: arm64
-        compiler: ${{ env.CC }}  # Use the CC variable set above
+        compiler: ${{ clang/15 }}  # Use the CC variable set above
         defconfig: RM6785_defconfig
         image: Image.gz-dtb
 
