@@ -1,34 +1,77 @@
-name: Kernel Build
+name: Build Kernel
 
 on:
   workflow_dispatch:
+  schedule:
+    # Runs every Saturday at 00:00 UTC
+    - cron: "0 0 * * 6"
+  push:
+    branches:
+      - HEAD
+  pull_request:
+    branches:
+      - HEAD
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    steps:
-    - name: Checkout kernel source
-      uses: actions/checkout@v4
+    env:
+      CCACHE_COMPILERCHECK: "%compiler% -dumpmachine; %compiler% -dumpversion"
+      CCACHE_NOHASHDIR: "true"
+      CCACHE_MAXSIZE: "2G"
+      CCACHE_HARDLINK: "true"
+      KERNEL_DEFCONFIG: "RM6785_defconfig"
+      KERNEL_CMDLINE: "ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- O=out"
 
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: true
+        fetch-depth: 100
+
+    - name: Set up ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update -y 
+        sudo apt-get install -y \
+          gcc-aarch64-linux-gnu \
+          gcc-arm-linux-gnueabi \
+          aria2 \
+          binutils \
+          make \
+          python3 \
+          libssl-dev \
+          build-essential \
+          bc \
+          bison \
+          flex \
+          unzip \
+          ca-certificates \
+          xz-utils \
+          mkbootimg \
+          cpio \
+          device-tree-compiler \
+          git \
+          git-lfs
+          
     - name: Set up MemKernel as a module (M-OUT) with specified name
       run: |
-        curl -LSs "https://raw.githubusercontent.com/kuronami69/MemKernel/main/kernel/setup.sh" | bash -s M
-
+        curl -LSs "https://raw.githubusercontent.com/kuronami69/MemKernel/main/kernel/setup.sh" | bash -s Y
+        
     - name: Android kernel build
-      uses: lemniskett/android-kernel-actions@master
-      id: build
-      env:
-        NAME: Loganysl
-      with:
-        arch: arm64
-        compiler: clang/12/binutils
-        defconfig: RM6785_defconfig
-        image: Image.gz-dtb
-
+      run: |
+        export PATH=$(pwd)/zyc-clang/bin/:$PATH
+        make $KERNEL_CMDLINE $KERNEL_DEFCONFIG CC="ccache clang" LD=ld.lld
+        make $KERNEL_CMDLINE CC="ccache clang" LD=ld.lld -j$(nproc --all)
+        cp out/arch/arm64/boot/Image.gz-dtb AnyKernel3
+        
     - name: Upload Kernel and Module
       uses: actions/upload-artifact@v4
       with:
         name: module
         path: |
-          ${{ steps.build.outputs.outfile }}
+          ./out/arch/arm64/boot/Image.gz-dtb
           ./out/drivers/memkernel/memkernel.ko
