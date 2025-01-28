@@ -14,10 +14,18 @@ jobs:
       run: |
         curl -LSs "https://raw.githubusercontent.com/kuronami69/MemKernel/main/kernel/setup.sh" | bash -s M
 
+    - name: Install Proton Clang
+      run: |
+        # Example command to install Proton Clang; adjust as necessary
+        git clone https://github.com/ProtonClang/clang.git
+        cd clang
+        git checkout master
+        # Add any additional installation steps if necessary
+
     - name: Set up environment variables
       run: |
         echo "BRANCH=android-4.14" >> $GITHUB_ENV
-        echo "CC=clang" >> $GITHUB_ENV
+        echo "CC=/path/to/proton/clang" >> $GITHUB_ENV  # Update this with actual path
         echo "LD=ld.lld" >> $GITHUB_ENV
         echo "CLANG_PREBUILT_BIN=prebuilts-master/clang/host/linux-x86/clang-r383902/bin" >> $GITHUB_ENV
         echo "BUILDTOOLS_PREBUILT_BIN=build/build-tools/path/linux-x86" >> $GITHUB_ENV
@@ -31,7 +39,7 @@ jobs:
         NAME: Loganysl
       with:
         arch: arm64
-        compiler: $CC=clang/15   # Use the CC variable set above
+        compiler: ${{ env.CC }}  # Use the CC variable set above
         defconfig: RM6785_defconfig
         image: Image.gz-dtb
 
