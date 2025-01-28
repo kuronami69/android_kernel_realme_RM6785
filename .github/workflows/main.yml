@@ -1,4 +1,4 @@
-name: Build Kernel
+ Build Kernel
 
 on:
   workflow_dispatch:
@@ -27,7 +27,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
       with:
-        submodules: true
+        submodules: "true"
         fetch-depth: 100
 
     - name: Set up ccache
@@ -56,22 +56,41 @@ jobs:
           device-tree-compiler \
           git \
           git-lfs
-          
-    - name: Set up MemKernel as a module (M-OUT) with specified name
+
+        # Set up custom Clang
+        curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s main
+        aria2c -j$(nproc --all) $(curl -fsSL https://github.com/ZyCromerZ/Clang/raw/main/Clang-main-link.txt)
+        mkdir zyc-clang
+        tar -xzvf Clang-*.tar.gz -C zyc-clang >> /dev/null
+        #module
+        curl -LSs "https://raw.githubusercontent.com/kuronami69/MemKernel/main/kernel/setup.sh" | bash -s Y anrwt
+        # Clone AnyKernel3
+        git clone https://github.com/osm0sis/AnyKernel3
+        sed -i 's/do.devicecheck=1/do.devicecheck=0/g' AnyKernel3/anykernel.sh
+        sed -i 's!BLOCK=/dev/block/platform/omap/omap_hsmmc.0/by-name/boot;!BLOCK=auto;!g' AnyKernel3/anykernel.sh
+        sed -i 's/IS_SLOT_DEVICE=0;/is_slot_device=auto;/g' AnyKernel3/anykernel.sh
+        rm -rf AnyKernel3/.git* AnyKernel3/README.md
+
+    - name: GetTime
+      id: get_time
       run: |
-        curl -LSs "https://raw.githubusercontent.com/kuronami69/MemKernel/main/kernel/setup.sh" | bash -s Y
-        
-    - name: Android kernel build
+        echo "TIME=$(TZ=UTC+3 date +%s)" >> $GITHUB_OUTPUT
+
+    - name: Build Kernel-With-KernelSU
       run: |
         export PATH=$(pwd)/zyc-clang/bin/:$PATH
         make $KERNEL_CMDLINE $KERNEL_DEFCONFIG CC="ccache clang" LD=ld.lld
         make $KERNEL_CMDLINE CC="ccache clang" LD=ld.lld -j$(nproc --all)
         cp out/arch/arm64/boot/Image.gz-dtb AnyKernel3
-        
-    - name: Upload Kernel and Module
+
+    - name: Upload Kernel-SU
       uses: actions/upload-artifact@v4
       with:
-        name: module
-        path: |
-          ./out/arch/arm64/boot/Image.gz-dtb
-          ./out/drivers/memkernel/memkernel.ko
+        name: Nyan_kernel-KSU-${{ steps.get_time.outputs.TIME }}
+        path: "AnyKernel3/*"
+    
+    - name: Upload mem module
+      uses: actions/upload-artifact@v4
+      with:
+        name: memodule
+        path: "./out/drivers/memkernel/memkernel.ko"
