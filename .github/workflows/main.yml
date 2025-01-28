@@ -20,7 +20,7 @@ jobs:
       env:
         NAME: Loganysl
       with:
-        arch: arm64 CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- O=out"
+        arch: arm64
         
         compiler: proton-clang/master
         defconfig: RM6785_defconfig
