@@ -23,7 +23,7 @@ jobs:
         arch: arm64
         CLANG_TRIPLE: aarch64-linux-gnu
         CROSS_COMPILE: aarch64-linux-gnu
-        compiler: clang/15/binutils
+        compiler: proton-clang/master
         defconfig: RM6785_defconfig
         image: Image.gz-dtb
 
