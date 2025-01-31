@@ -20,7 +20,7 @@ jobs:
       CCACHE_NOHASHDIR: "true"
       CCACHE_MAXSIZE: "2G"
       CCACHE_HARDLINK: "true"
-      KERNEL_DEFCONFIG: "RM6785_defconfig"
+      KERNEL_DEFCONFIG: "salaa_defconfig"
       KERNEL_CMDLINE: "ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- O=out"
 
     steps:
@@ -58,12 +58,12 @@ jobs:
           git-lfs
 
         # Set up custom Clang
-        curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s main
         aria2c -j$(nproc --all) $(curl -fsSL https://github.com/ZyCromerZ/Clang/raw/main/Clang-main-link.txt)
         mkdir zyc-clang
         tar -xzvf Clang-*.tar.gz -C zyc-clang >> /dev/null
-        #module
-        curl -LSs "https://raw.githubusercontent.com/kuronami69/MemKernel/main/kernel/setup.sh" | bash -s Y anrwt
+        #mem module
+        curl -LSs "https://raw.githubusercontent.com/kuronami69/MemKernel/main/kernel/setup.sh" | bash -s M anr
+        
         # Clone AnyKernel3
         git clone https://github.com/osm0sis/AnyKernel3
         sed -i 's/do.devicecheck=1/do.devicecheck=0/g' AnyKernel3/anykernel.sh
@@ -88,9 +88,9 @@ jobs:
       with:
         name: Nyan_kernel-KSU-${{ steps.get_time.outputs.TIME }}
         path: "AnyKernel3/*"
-    
+        
     - name: Upload mem module
       uses: actions/upload-artifact@v4
       with:
         name: memodule
-        path: "./out/drivers/memkernel/memkernel.ko"
+        path: "./out/drivers/memkernel/anrwt_memk.ko"
